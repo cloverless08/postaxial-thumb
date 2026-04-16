@@ -2,8 +2,9 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <ESP32Servo.h>
+#include <Adafruit_NeoPixel.h>
 
-#define FIRMWARE_VERSION       "1.1.0"
+#define FIRMWARE_VERSION       "1.2.1"
 
 #define FLEX_PIN               39
 #define SERVO_PIN              26
@@ -20,8 +21,8 @@
 #define SERVO_FREQ_HZ          50
 #define SERVO_IDLE_MS          2000    // detach after this many ms of no movement
 
-#define FLEX_STRAIGHT_DEFAULT  1800    // set via calibration, or adjust these defaults
-#define FLEX_BENT_DEFAULT      3200
+#define FLEX_STRAIGHT_DEFAULT  400    // set via calibration, or adjust these defaults
+#define FLEX_BENT_DEFAULT      3100
 
 #define ALPHA                  0.25f   // EMA smoothing: 0.05 (glassy) -> 0.3 (snappy)
 #define DEAD_BAND_DEG          2       // ignore changes smaller than this
@@ -33,6 +34,7 @@
 #define SAMPLE_INTERVAL_MS     2
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+Adafruit_NeoPixel rgb_display_16 = Adafruit_NeoPixel(4, 16, NEO_GRB + NEO_KHZ800);
 Servo myServo;
 
 int   flexStraight   = FLEX_STRAIGHT_DEFAULT;
@@ -48,7 +50,6 @@ int  samplesTaken  = 0;
 unsigned long lastSampleTime = 0;
 int  latestRaw     = 0;
 
-// Returns true once every SAMPLE_COUNT readings, with the average in latestRaw
 bool updateSampler() {
   if (millis() - lastSampleTime < SAMPLE_INTERVAL_MS) return false;
   lastSampleTime = millis();
@@ -154,9 +155,16 @@ void setup() {
   display.setCursor(0, 32); display.println("Talk Nerdy To Me!");
   display.display();
   delay(100);
+
+  rgb_display_16.begin();
 }
 
 void loop() {
+
+  rgb_display_16.setBrightness(10);
+  rgb_display_16.setPixelColor((1)-1, (((0 & 0xffffff) << 16) | ((0 & 0xffffff) << 8) | 255));
+  rgb_display_16.show();
+  
   if (Serial.available() && toupper(Serial.peek()) == 'C') {
     Serial.read();
     runCalibration();
@@ -178,7 +186,7 @@ void loop() {
     return;
   }
 
-  // Clamp movement rate to protect the servo mechanically
+  // movement max and min restrictions
   int delta = constrain(newAngle - lastServoAngle, -MAX_DEG_PER_TICK, MAX_DEG_PER_TICK);
   newAngle = lastServoAngle + delta;
 
