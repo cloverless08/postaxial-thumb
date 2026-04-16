@@ -24,11 +24,11 @@
 #define FLEX_STRAIGHT_DEFAULT  400    // set via calibration, or adjust these defaults
 #define FLEX_BENT_DEFAULT      3100
 
-#define ALPHA                  0.25f   // EMA smoothing: 0.05 (glassy) -> 0.3 (snappy)
+#define ALPHA                  0.3f   // EMA smoothing: 0.05 (glassy) -> 0.3 (snappy)
 #define DEAD_BAND_DEG          2       // ignore changes smaller than this
 #define MAX_DEG_PER_TICK       30      // max servo travel per loop tick
 
-#define INVERT_DIRECTION       false   // flip if servo is mounted backwards
+#define INVERT_DIRECTION       true   // flip if servo is mounted backwards
 
 #define SAMPLE_COUNT           16
 #define SAMPLE_INTERVAL_MS     2
